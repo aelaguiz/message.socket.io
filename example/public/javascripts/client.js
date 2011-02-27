@@ -5,11 +5,11 @@
 var ChatRoom = function ChatRoom() {
 	this.expose = {
 		'joined': {
-			'function': '__api__joined'
+			'eventHandler': '__api__joined'
 		}
 	};
 	
-	this.__api__joined = function __api__joined(args) {
+	this.__api__joined = function __api__joined(comInstance, args) {
 		console.log("Someone joined");
 		console.dir(args);
 	}
