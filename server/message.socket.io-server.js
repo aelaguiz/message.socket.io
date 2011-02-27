@@ -16,7 +16,7 @@ Server.prototype.init = function init() {
 	var self = this;
 	
 	this._socket.on('connection', function(client) { 
-		var talker = new Talker(client, this._queryObjects);
+		var talker = new Talker(client, self._queryObjects);
 		
 		talker.init();
 		

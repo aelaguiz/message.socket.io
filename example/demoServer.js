@@ -1,5 +1,5 @@
-
-var MessageServer = require('./message.socket.io').Server;
+var MessageServer = require('./message.socket.io').Server,
+	EventEmitter = require('events').EventEmitter;
 
 ChatRoom = function ChatRoom() { 
 	this.expose = {
@@ -14,6 +14,8 @@ ChatRoom = function ChatRoom() {
 	this.clients = [];
 }
 
+ChatRoom.prototype.__proto__ = EventEmitter.prototype;
+
 ChatRoom.prototype.__api__join = function __api__join(comInstance, args, callback) {
 	var nick = args.nick;
 		
@@ -26,19 +28,21 @@ ChatRoom.prototype.__api__join = function __api__join(comInstance, args, callbac
 	else {
 		this.clients[nick] = comInstance;
 		
-		comInstance.subscribeObject(this, 'join');
-		comInstance.subscribeObject(this, 'leave');
-		comInstance.subscribeObject(this, 'say');
+		console.log(nick + " joined");
+		
+		comInstance.subscribeObject(this, 'joined');
+		comInstance.subscribeObject(this, 'left');
+		comInstance.subscribeObject(this, 'said');
 		
 		callback(null, true);
 		
-		this.emit('join', nick);
+		this.emit('joined', 'room', {'nick': nick});
 	}
 }
 
 exports.DemoServer = function DemoServer(httpServer) {
 	var _server = new MessageServer(httpServer),
-		_room = new ChatRoom();;
+		_room = new ChatRoom();
 	
 	_server.addQueryObject('room', _room);
 }

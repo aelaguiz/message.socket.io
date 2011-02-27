@@ -18,3 +18,7 @@ var io = {
     	on: function () {}
     }
 }
+
+var Talker = {
+	"sendQuery": function() {}
+}

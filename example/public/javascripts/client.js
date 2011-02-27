@@ -2,8 +2,22 @@
  * Yes I could have used jQuery for all of this but I am too lazy so, enjoy
  */
 
+var ChatRoom = function ChatRoom() {
+	this.expose = {
+		'joined': {
+			'function': '__api__joined'
+		}
+	};
+	
+	this.__api__joined = function __api__joined(args) {
+		console.log("Someone joined");
+		console.dir(args);
+	}
+}
+
 var socket,
-	nickName;
+	nickName,
+	room = new ChatRoom();
 
 function connect(container) {
 	var span = document.createElement('span');	
@@ -13,10 +27,17 @@ function connect(container) {
 	
 	socket = new MSIOClient('localhost', 8084);
 	
+	socket.addQueryObject('room', room);
+	
 	socket.connect(function() {
+		console.log("Connected");
+		
 		container.removeChild(span);
 		
-		//socket.query('room.join', )
+		socket.query('room.join', {'nick': nickName}, function(res) {
+			console.log("Received " + res);
+		});
+		
 		startChat(container);
 	});
 }
