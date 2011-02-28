@@ -1,5 +1,11 @@
 /*
- * Simple chat client. Probably should have just used jQuery for my entity creation, etc - but this was easy enough
+ * Simple chat client. Probably should have just used jQuery for my entity creation, etc - but this was easy enough.
+ * 
+ * This demo is pretty crappy in that I used a random mix of css and html, I dynamically generate entities in some places and statically create (and toggle visibility) in other places. 
+ * 
+ * Don't judge me.
+ * 
+ * Amir Elaguizy
  */
  
 //http://ejohn.org/blog/javascript-array-remove/
@@ -31,17 +37,17 @@ var ChatRoom = function ChatRoom(chatList, inputArea, list) {
 	};
 	
 	this.__api__joined = function __api__joined(comInstance, args) {
-		this._addMetaLine(args.nick + " joined");
-		this.addUser(args.nick);
+		this._addMetaLine(args['nick'] + " joined");
+		this.addUser(args['nick']);
 	}
 	
 	this.__api__left = function __api__left(comInstance, args) {
-		this._addMetaLine(args.nick + " left");
-		this.delUser(args.nick);
+		this._addMetaLine(args['nick'] + " left");
+		this.delUser(args['nick']);
 	}
 	
 	this.__api__said = function __api__said(comInstance, args) {
-		this._addChat(args.nick, args.text);
+		this._addChat(args['nick'], args['text']);
 	}
 	
 	this.addUser = function addUser(nick) {
@@ -75,10 +81,12 @@ var ChatRoom = function ChatRoom(chatList, inputArea, list) {
 	}
 	this._addLine = function addLine(chatText) {
 		_chatList.innerHTML += "<li class='chat'>" + chatText + "</li>";
+		_chatList.scrollTop = _chatList.scrollHeight;
 	}
 	
 	this._addMetaLine = function addMetaLine(text) {
 		_chatList.innerHTML += "<li class='meta'>" + text + "</li>";
+		_chatList.scrollTop = _chatList.scrollHeight;
 	}
 	
 	this._addUserHTML = function addUserHTML(nick) {
@@ -86,15 +94,19 @@ var ChatRoom = function ChatRoom(chatList, inputArea, list) {
 	}
 }
 
-// Export the class so that the closure compiler doesn't rename it
-window['ChatRoom'] = ChatRoom;
-ChatRoom.prototype['expose'] = MSIOClient.prototype.expose;
-
+/*
+ * Don't look under the skirt
+ */
+ 
+ 
+/*
+ * Skirt:
+ */
 var nickName;
 
 function connect(container) {
 	var span = document.createElement('span'),
-		socket = new MSIOClient('localhost', 8084);	
+		socket = new MSIOClient(null, 8084);	
 	
 	span.innerHTML = "Loading...<img src='/images/loading.gif'>";
 	container.appendChild(span);
@@ -144,14 +156,17 @@ function joinChat(socket, room, inputArea) {
 			alert("Failed to join chat room: " + data.message);
 		}
 		else {
-			for(var i = 0, max = data.users.length; i < max; i++) {
-				var user = data.users[i];
+			var e = document.getElementById('infoz');
+          	e.style.display = 'block';
+          
+			for(var i = 0, max = data['users'].length; i < max; i++) {
+				var user = data['users'][i];
 				
 				room.addUser(user);
 			}
 			
-			for(var i = 0, max = data.history.length; i < max; i++) {
-				var chat = data.history[i];
+			for(var i = 0, max = data['history'].length; i < max; i++) {
+				var chat = data['history'][i];
 				
 				room.__api__said(socket, chat);
 			}
@@ -170,26 +185,34 @@ function joinChat(socket, room, inputArea) {
 		}
 	});
 	
+	var _clearCount = 0;
 	inputArea.addEventListener('click', function(event) {
-		inputArea.value = '';
+		if(0 == _clearCount++) {
+			inputArea.value = '';			
+		}
 	});
 }
 
 function getNick() {
 	var container = document.createElement('div'),
-		inputField = document.createElement('input');
+		inputField = document.createElement('input'),
+		instructions = document.createElement('instructions');
 	
 	inputField.type = 'text';
 	inputField.maxlength = 20;
 	inputField.value = 'Nickname' + Math.ceil(Math.random() * 100);
 	
+	instructions.innerHTML = '<ol><li>Enter Nickname</li><li>Hit Enter</li></ol>'
+	
 	container.appendChild(inputField);
+	container.appendChild(instructions);
 	
 	document.body.appendChild(container);
 	
 	inputField.addEventListener('keydown', function(event) {
 		if(13 == event.keyCode) {
 			container.removeChild(inputField);
+			container.removeChild(instructions);
 			
 			nickName = inputField.value;
 			connect(container);

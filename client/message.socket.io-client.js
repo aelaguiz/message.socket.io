@@ -1,6 +1,4 @@
 MSIOClient = function MSIOClient(host, port) {
-	console.dir(io);
-	
 	this._queryObjects = [];
 	
 	this._socket = new io.Socket(host, { 'port': port, 'transports': ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling']});

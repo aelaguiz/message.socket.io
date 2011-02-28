@@ -5,7 +5,7 @@ body {
 
 .chatlist {
 	border: solid 1px gray;
-	overflow: auto;
+	overflow: scroll;
 	padding: 10px;
 	list-style-type: none;
 	list-style-position: inside;
@@ -19,3 +19,11 @@ body {
 	color: gray;
 	font-style: italic;
 } 
+
+#infoz {
+	padding: 10px;
+	line-height: 200%;
+	position: absolute;
+	top: 360px;
+	display: none;
+}
