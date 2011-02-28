@@ -34,6 +34,7 @@ Your favorite web browser should be chrome, because that's all I have tested wit
 
 This is basically just a bunch of code I wrote for my own experimentation, I wrote it in Ubuntu 10.10 using chrome beta 10+. That's the only place I've tested any of it, but I've been lead to believe it works elsewhere.
 
+The example is the documentation. I'd much rather write source code than documentation.
 
 ## License
 

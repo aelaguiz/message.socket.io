@@ -175,11 +175,15 @@ function joinChat(socket, room, inputArea) {
 	
 	inputArea.addEventListener('keydown', function(event) {
 		if(13 == event.keyCode) {
-			socket.query('room.say', {'text': inputArea.value}, function(data) {
-				if(data instanceof Error) {
-					alert("Failed to send chat!");
-				}
-			});
+			var text = inputArea.value;
+			
+			if(text.length > 0) {
+				socket.query('room.say', {'text': text}, function(data) {
+					if(data instanceof Error) {
+						alert("Failed to send chat!");
+					}
+				});
+			}
 			
 			inputArea.value = '';
 		}
