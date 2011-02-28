@@ -13,7 +13,7 @@ MSIOClient.prototype.connect = function connect(connectCallback, errorCallback) 
 	this._socket.connect();
 	
 	this._socket.on('connect', function() {
-		self._talker = new Talker(self._socket, []);
+		self._talker = new Talker(self._socket, self._queryObjects);
 
 		self._talker.init();
 		
@@ -39,10 +39,9 @@ MSIOClient.prototype.delQueryObject = function delQueryObject(objName) {
 	delete this._queryObjects[objName];
 }
 
-// Export the class so that the closure compiler doesn't rename it'
+// Export the class so that the closure compiler doesn't rename it
 window['MSIOClient'] = MSIOClient;
 MSIOClient.prototype['connect'] = MSIOClient.prototype.connect;
 MSIOClient.prototype['query'] = MSIOClient.prototype.query;
-
-
-console.log("sup");
+MSIOClient.prototype['addQueryObject'] = MSIOClient.prototype.addQueryObject;
+MSIOClient.prototype['delQueryObject'] = MSIOClient.prototype.delQueryObject;

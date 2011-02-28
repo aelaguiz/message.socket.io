@@ -2,3 +2,20 @@ body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
+
+.chatlist {
+	border: solid 1px gray;
+	overflow: auto;
+	padding: 10px;
+	list-style-type: none;
+	list-style-position: inside;
+}
+
+.chatlist li.chat {
+	
+} 
+
+.chatlist li.meta {
+	color: gray;
+	font-style: italic;
+} 

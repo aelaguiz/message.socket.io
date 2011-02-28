@@ -11,10 +11,32 @@ ChatRoom = function ChatRoom() {
 		}
 	};
 	
+	this.nickList = [];
 	this.clients = [];
+	this.chatLines = [];
 }
 
 ChatRoom.prototype.__proto__ = EventEmitter.prototype;
+
+ChatRoom.prototype.__api__say = function __api__say(comInstance, args, callback) {
+	var text = args.text,
+		nick,
+		lineObj;
+		
+	if(undefined === text) {
+		callback(new Error("Client did not say shit"));
+	}
+	else {
+		nick = this.clients[comInstance.getInstanceId()];
+		
+		lineObj = {'nick': nick, 'text': text};
+		this.chatLines.push(lineObj);
+		
+		callback(null, true);
+		
+		this.emit('said', 'room', lineObj);
+	}
+}
 
 ChatRoom.prototype.__api__join = function __api__join(comInstance, args, callback) {
 	var nick = args.nick;
@@ -26,7 +48,7 @@ ChatRoom.prototype.__api__join = function __api__join(comInstance, args, callbac
 		callback(new Error("Nickname is already in use"));
 	}
 	else {
-		this.clients[nick] = comInstance;
+		this.clients[comInstance.getInstanceId()] = nick;
 		
 		console.log(nick + " joined");
 		
@@ -34,11 +56,14 @@ ChatRoom.prototype.__api__join = function __api__join(comInstance, args, callbac
 		comInstance.subscribeObject(this, 'left');
 		comInstance.subscribeObject(this, 'said');
 		
-		callback(null, true);
+		callback(null, {'result': true, 'users': this.nickList, history: this.chatLines.slice(-10)});
 		
 		this.emit('joined', 'room', {'nick': nick});
+		
+		this.nickList.push(nick);
 	}
 }
+
 
 exports.DemoServer = function DemoServer(httpServer) {
 	var _server = new MessageServer(httpServer),
