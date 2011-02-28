@@ -15,8 +15,11 @@ Check out this <a href='https://gist.github.com/847609'>gist</a> to see how simp
 ## Getting Started
 
 git clone git@github.com:aelaguiz/message.socket.io.git
+
 cd message.socket.io
+
 make
+
 node example/runme.js
 
 Navigate to http://localhost:8084 in your favorite web browser.
