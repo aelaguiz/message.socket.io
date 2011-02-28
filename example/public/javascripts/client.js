@@ -35,20 +35,32 @@ var ChatRoom = function ChatRoom(chatList, inputArea, list) {
 	}
 	
 	this.addUser = function addUser(nick) {
-		_nickList.push(nick);
-		this._addUserHTML(nick);
+		/*
+		 * This is necessary to compensate for a v8 bug in which json encoding an array after an item is deleted results in a superfluous null entry
+		 */
+		if(null !== nick) {
+			_nickList.push(nick);
+			this._addUserHTML(nick);
+		}
 	}
 	
 	
 	this.delUser = function delUser(nick) {
-		_userList.innerHTML = '';
-		
 		for(var i = 0; i < _nickList.length; i++) {
 			if(nick === _nickList[i]) {
 				delete _nickList[i];
+				break;
 			}
-			else {
-				this._addUserHTML(_nickList[i]);
+		}
+		
+		_userList.innerHTML = '';
+		
+		for(var i = 0; i < _nickList.length; i++) {
+			/*
+			 * This is necessary to compensate for a v8 bug in which json encoding an array after an item is deleted results in a superfluous null entry
+			 */
+			if(null !== _nickList[i]) {
+				this._addUserHTML(_nickList[i]);	
 			}
 		}
 	}

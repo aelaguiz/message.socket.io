@@ -56,11 +56,17 @@ ChatRoom.prototype.__api__join = function __api__join(comInstance, args, callbac
 		comInstance.subscribeObject(this, 'left');
 		comInstance.subscribeObject(this, 'said');
 		
+		console.log("Nick list before sending");
+		console.dir(this.nickList);
+		
 		callback(null, {'users': this.nickList, history: this.chatLines.slice(-10)});
 		
 		this.emit('joined', 'room', {'nick': nick});
 		
 		this.nickList.push(nick);
+		
+		console.log("Nick list");
+		console.dir(this.nickList);
 	}
 }
 
