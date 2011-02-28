@@ -5,11 +5,15 @@
 var ChatRoom = function ChatRoom(chatList, inputArea, list) {
 	var _chatList = chatList,
 		_inputText = inputArea,
-		_userList = list;
+		_userList = list,
+		_nickList = [];
 		
 	this.expose = {
 		'joined': {
 			'eventHandler': '__api__joined'
+		},
+		'left': {
+			'eventHandler': '__api__left'
 		},
 		'said': {
 			'eventHandler': '__api__said'
@@ -17,27 +21,51 @@ var ChatRoom = function ChatRoom(chatList, inputArea, list) {
 	};
 	
 	this.__api__joined = function __api__joined(comInstance, args) {
-		this.addMetaLine(args.nick + " joined");
+		this._addMetaLine(args.nick + " joined");
 		this.addUser(args.nick);
 	}
 	
+	this.__api__left = function __api__left(comInstance, args) {
+		this._addMetaLine(args.nick + " left");
+		this.delUser(args.nick);
+	}
+	
 	this.__api__said = function __api__said(comInstance, args) {
-		this.addChat(args.nick, args.text);
+		this._addChat(args.nick, args.text);
 	}
 	
 	this.addUser = function addUser(nick) {
-		_userList.innerHTML += "<li>" + nick + "</li>";
+		_nickList.push(nick);
+		this._addUserHTML(nick);
 	}
 	
-	this.addChat = function addChat(nick, text) {
-		this.addLine(nick + ": " + text);
+	
+	this.delUser = function delUser(nick) {
+		_userList.innerHTML = '';
+		
+		for(var i = 0; i < _nickList.length; i++) {
+			if(nick === _nickList[i]) {
+				delete _nickList[i];
+			}
+			else {
+				this._addUserHTML(_nickList[i]);
+			}
+		}
 	}
-	this.addLine = function addLine(chatText) {
+	
+	this._addChat = function addChat(nick, text) {
+		this._addLine(nick + ": " + text);
+	}
+	this._addLine = function addLine(chatText) {
 		_chatList.innerHTML += "<li class='chat'>" + chatText + "</li>";
 	}
 	
-	this.addMetaLine = function addMetaLine(text) {
+	this._addMetaLine = function addMetaLine(text) {
 		_chatList.innerHTML += "<li class='meta'>" + text + "</li>";
+	}
+	
+	this._addUserHTML = function addUserHTML(nick) {
+		_userList.innerHTML += "<li>" + nick + "</li>";
 	}
 }
 
@@ -93,7 +121,10 @@ function joinChat(socket, room, inputArea) {
 	socket.addQueryObject('room', room);
 		
 	socket.query('room.join', {'nick': nickName}, function(data) {
-		if(true == data.result) {
+		if(data instanceof Error) {
+			alert("Failed to join chat room: " + data.message);
+		}
+		else {
 			for(var i = 0, max = data.users.length; i < max; i++) {
 				var user = data.users[i];
 				
@@ -106,9 +137,6 @@ function joinChat(socket, room, inputArea) {
 				room.__api__said(socket, chat);
 			}
 		}
-		else {
-			alert("Failed to join chat room!");
-		}
 	});
 	
 	inputArea.addEventListener('keydown', function(event) {
@@ -116,7 +144,7 @@ function joinChat(socket, room, inputArea) {
 			console.log("Chat: " + inputArea.value)
 			
 			socket.query('room.say', {'text': inputArea.value}, function(data) {
-				if(true != data) {
+				if(data instanceof Error) {
 					alert("Failed to send chat!");
 				}
 			});

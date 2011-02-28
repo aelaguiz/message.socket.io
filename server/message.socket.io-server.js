@@ -1,7 +1,8 @@
 require.paths.push(__dirname + '/../lib');
 
 var io = require('socket.io-node'),
-	Talker = require('common').Talker;
+	Talker = require('common').Talker,
+	EventEmitter = require('events').EventEmitter;
  
 exports.Server = Server = function Server(httpServer) {
 	this._socket = io.listen(httpServer);
@@ -12,6 +13,8 @@ exports.Server = Server = function Server(httpServer) {
 }
 
 
+Server.prototype.__proto__ = EventEmitter.prototype;
+
 Server.prototype.init = function init() {
 	var self = this;
 	
@@ -21,6 +24,10 @@ Server.prototype.init = function init() {
 		talker.init();
 		
 		self._talkers.push(talker);
+		
+		client.on('disconnect', function() {
+			self.emit('disconnect', talker);
+		});
 	});
 }
 
