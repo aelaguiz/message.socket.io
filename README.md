@@ -18,6 +18,10 @@ git clone git@github.com:aelaguiz/message.socket.io.git
 
 cd message.socket.io
 
+git submodule init
+
+git submodule update
+
 make
 
 node example/runme.js
