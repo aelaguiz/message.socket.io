@@ -1,6 +1,13 @@
 /*
- * Yes I could have used jQuery for all of this but I am too lazy so, enjoy
+ * Simple chat client. Probably should have just used jQuery for my entity creation, etc - but this was easy enough
  */
+ 
+//http://ejohn.org/blog/javascript-array-remove/
+arrayRemove = function(arr, from, to) {
+  	var rest = arr.slice((to || from) + 1 || arr.length);
+  	arr.length = from < 0 ? arr.length + from : from;
+	return arr.push.apply(arr, rest);
+};
 
 var ChatRoom = function ChatRoom(chatList, inputArea, list) {
 	var _chatList = chatList,
@@ -8,6 +15,9 @@ var ChatRoom = function ChatRoom(chatList, inputArea, list) {
 		_userList = list,
 		_nickList = [];
 		
+	/*
+	 * Handle three events from the communications layer 
+	 */
 	this.expose = {
 		'joined': {
 			'eventHandler': '__api__joined'
@@ -35,33 +45,28 @@ var ChatRoom = function ChatRoom(chatList, inputArea, list) {
 	}
 	
 	this.addUser = function addUser(nick) {
-		/*
-		 * This is necessary to compensate for a v8 bug in which json encoding an array after an item is deleted results in a superfluous null entry
-		 */
-		if(null !== nick) {
-			_nickList.push(nick);
-			this._addUserHTML(nick);
-		}
+		_nickList.push(nick);
+		this._addUserHTML(nick);
 	}
 	
-	
 	this.delUser = function delUser(nick) {
-		for(var i = 0; i < _nickList.length; i++) {
+		/*
+		 * Remove the user from our user list
+		 */
+		for(var i = 0, max = _nickList.length; i < max; i++) {
 			if(nick === _nickList[i]) {
-				delete _nickList[i];
+				arrayRemove(_nickList, i);
 				break;
 			}
 		}
 		
+		/*
+		 * Rebuild the user list html entity
+		 */
 		_userList.innerHTML = '';
 		
-		for(var i = 0; i < _nickList.length; i++) {
-			/*
-			 * This is necessary to compensate for a v8 bug in which json encoding an array after an item is deleted results in a superfluous null entry
-			 */
-			if(null !== _nickList[i]) {
-				this._addUserHTML(_nickList[i]);	
-			}
+		for(var i = 0, max = _nickList.length; i < max; i++) {
+			this._addUserHTML(_nickList[i]);	
 		}
 	}
 	
@@ -81,6 +86,10 @@ var ChatRoom = function ChatRoom(chatList, inputArea, list) {
 	}
 }
 
+// Export the class so that the closure compiler doesn't rename it
+window['ChatRoom'] = ChatRoom;
+ChatRoom.prototype['expose'] = MSIOClient.prototype.expose;
+
 var nickName;
 
 function connect(container) {
@@ -91,8 +100,6 @@ function connect(container) {
 	container.appendChild(span);
 	
 	socket.connect(function() {
-		console.log("Connected");
-		
 		container.removeChild(span);
 	
 		startChat(container, socket);
@@ -153,8 +160,6 @@ function joinChat(socket, room, inputArea) {
 	
 	inputArea.addEventListener('keydown', function(event) {
 		if(13 == event.keyCode) {
-			console.log("Chat: " + inputArea.value)
-			
 			socket.query('room.say', {'text': inputArea.value}, function(data) {
 				if(data instanceof Error) {
 					alert("Failed to send chat!");
@@ -164,6 +169,10 @@ function joinChat(socket, room, inputArea) {
 			inputArea.value = '';
 		}
 	});
+	
+	inputArea.addEventListener('click', function(event) {
+		inputArea.value = '';
+	});
 }
 
 function getNick() {
@@ -172,7 +181,7 @@ function getNick() {
 	
 	inputField.type = 'text';
 	inputField.maxlength = 20;
-	inputField.value = 'Nickname'
+	inputField.value = 'Nickname' + Math.ceil(Math.random() * 100);
 	
 	container.appendChild(inputField);
 	

@@ -1,7 +1,17 @@
 var MessageServer = require('./message.socket.io').Server,
 	EventEmitter = require('events').EventEmitter;
 
-ChatRoom = function ChatRoom() { 
+//http://ejohn.org/blog/javascript-array-remove/
+arrayRemove = function(arr, from, to) {
+  	var rest = arr.slice((to || from) + 1 || arr.length);
+  	arr.length = from < 0 ? arr.length + from : from;
+	return arr.push.apply(arr, rest);
+};
+
+ChatRoom = function ChatRoom() {
+	/*
+	 * Expose two functions to the communications layer, joining and talking
+	 */ 
 	this.expose = {
 		'say': {
 			'function': '__api__say'
@@ -50,23 +60,15 @@ ChatRoom.prototype.__api__join = function __api__join(comInstance, args, callbac
 	else {
 		this.clients[comInstance.getInstanceId()] = nick;
 		
-		console.log(nick + " joined");
-		
 		comInstance.subscribeObject(this, 'joined');
 		comInstance.subscribeObject(this, 'left');
 		comInstance.subscribeObject(this, 'said');
-		
-		console.log("Nick list before sending");
-		console.dir(this.nickList);
 		
 		callback(null, {'users': this.nickList, history: this.chatLines.slice(-10)});
 		
 		this.emit('joined', 'room', {'nick': nick});
 		
 		this.nickList.push(nick);
-		
-		console.log("Nick list");
-		console.dir(this.nickList);
 	}
 }
 
@@ -94,11 +96,8 @@ ChatRoom.prototype.isNickAvailable = function isNickAvailable(nick) {
 ChatRoom.prototype.removeNick = function removeNick(nick) {
 	for(var i = 0, max = this.nickList.length; i < max; i++) {
 		if(nick == this.nickList[i]) {
-			delete this.nickList[i];
-			
-			console.log("Removed nick");
-			console.dir(this.nickList);
-			return ;
+			arrayRemove(this.nickList, i);
+			break;
 		}
 	}
 }
