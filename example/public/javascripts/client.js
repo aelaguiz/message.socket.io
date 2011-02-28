@@ -187,14 +187,14 @@ function joinChat(socket, room, inputArea) {
 			
 			inputArea.value = '';
 		}
-	});
+	}, true);
 	
 	var _clearCount = 0;
 	inputArea.addEventListener('click', function(event) {
 		if(0 == _clearCount++) {
 			inputArea.value = '';			
 		}
-	});
+	}, true);
 }
 
 function getNick() {
@@ -221,7 +221,7 @@ function getNick() {
 			nickName = inputField.value;
 			connect(container);
 		}
-	});
+	}, true);
 }
 
 getNick();
