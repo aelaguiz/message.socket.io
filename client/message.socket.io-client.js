@@ -1,6 +1,8 @@
-MSIOClient = function MSIOClient(host, port) {
+MSIOClient = function MSIOClient(host, port, debug) {
 	this._queryObjects = [];
 	
+	this.debug = debug || false;
+
 	this._socket = new io.Socket(host, { 'port': port, 'transports': ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling']});
 	this._talker = undefined;
 }
@@ -11,7 +13,7 @@ MSIOClient.prototype.connect = function connect(connectCallback, errorCallback) 
 	this._socket.connect();
 	
 	this._socket.on('connect', function() {
-		self._talker = new Talker(self._socket, self._queryObjects);
+		self._talker = new Talker(self._socket, self._queryObjects, self.debug);
 
 		self._talker.init();
 		

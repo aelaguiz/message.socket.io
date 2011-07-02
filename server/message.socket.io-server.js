@@ -4,11 +4,13 @@ var io = require('socket.io-node'),
 	Talker = require('common').Talker,
 	EventEmitter = require('events').EventEmitter;
  
-exports.Server = Server = function Server(httpServer) {
+exports.Server = Server = function Server(httpServer, debug) {
 	this._socket = io.listen(httpServer);
 	this._talkers = [];
 	this._queryObjects = [];
 	
+	this.debug = debug || false;
+
 	this.init();
 }
 
@@ -16,19 +18,17 @@ exports.Server = Server = function Server(httpServer) {
 Server.prototype.__proto__ = EventEmitter.prototype;
 
 Server.prototype.init = function init() {
-	var self = this;
-	
-	this._socket.on('connection', function(client) { 
-		var talker = new Talker(client, self._queryObjects);
+	this._socket.on('connection', _.bind(function(client) { 
+		var talker = new Talker(client, this._queryObjects, this.debug);
 		
 		talker.init();
 		
-		self._talkers.push(talker);
+		this._talkers.push(talker);
 		
 		client.on('disconnect', function() {
-			self.emit('disconnect', talker);
+			this.emit('disconnect', talker);
 		});
-	});
+	}, this));
 }
 
 /**
