@@ -25,9 +25,9 @@ Server.prototype.init = function init() {
 		
 		this._talkers.push(talker);
 		
-		client.on('disconnect', function() {
+		client.on('disconnect', _.bind(function() {
 			this.emit('disconnect', talker);
-		});
+		}, this));
 	}, this));
 }
 
